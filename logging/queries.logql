@@ -1,0 +1,8 @@
+# 1. Xem log Nginx
+{job="nginx"}
+
+# 2. Lọc dòng chứa thông báo lỗi Nginx
+{job="nginx"} |= "[error]"
+
+# 3. Đếm dòng log trong cửa sổ 5 phút
+sum(count_over_time({job="nginx"}[5m]))

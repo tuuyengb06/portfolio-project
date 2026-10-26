@@ -1,0 +1,32 @@
+services:
+  loki:
+    image: grafana/loki:3.2.1
+    container_name: portfolio-loki
+    command: -config.file=/etc/loki/loki.yml
+    ports:
+      - "127.0.0.1:3100:3100"
+    volumes:
+      - ./logging/loki.yml:/etc/loki/loki.yml:ro
+      - portfolio-loki-data:/loki
+    restart: unless-stopped
+    networks:
+      - frontend
+
+  promtail:
+    image: grafana/promtail:3.2.1
+    container_name: portfolio-promtail
+    command: -config.file=/etc/promtail/promtail.yml
+    volumes:
+      - ./logging/promtail.yml:/etc/promtail/promtail.yml:ro
+      - nginx-logs:/logs/nginx:ro
+      - app-logs:/logs/php:ro
+      - portfolio-promtail-data:/positions
+    depends_on:
+      - loki
+    restart: unless-stopped
+    networks:
+      - frontend
+
+volumes:
+  portfolio-loki-data:
+  portfolio-promtail-data:
