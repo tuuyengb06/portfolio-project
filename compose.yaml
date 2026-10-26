@@ -1,0 +1,95 @@
+services:
+  web:
+    build:
+      context: ./website
+      dockerfile: Dockerfile
+    container_name: portfolio-web
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${MYSQL_DATABASE}
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - app-logs:/var/log/portfolio
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - frontend
+      - backend
+
+  mysql:
+    image: mysql:8.0
+    container_name: portfolio-mysql
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - portfolio-mysql-data:/var/lib/mysql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'MYSQL_PWD="$${MYSQL_PASSWORD}" mysql --protocol=TCP -h 127.0.0.1 -u "$${MYSQL_USER}" "$${MYSQL_DATABASE}" -e "SELECT 1"'
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - backend
+
+  phpmyadmin:
+    image: phpmyadmin:5.2-apache
+    container_name: portfolio-phpmyadmin
+    ports:
+      - "127.0.0.1:8091:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - frontend
+      - backend
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: portfolio-nginx
+    ports:
+      - "127.0.0.1:8090:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - nginx-logs:/var/log/portfolio-nginx
+    command:
+      - /bin/sh
+      - -c
+      - |
+        rm -f /var/log/nginx/access.log /var/log/nginx/error.log
+        ln -s /var/log/portfolio-nginx/access.log /var/log/nginx/access.log
+        ln -s /var/log/portfolio-nginx/error.log /var/log/nginx/error.log
+        exec nginx -g 'daemon off;'
+    depends_on:
+      - web
+    restart: unless-stopped
+    networks:
+      - frontend
+
+volumes:
+  portfolio-mysql-data:
+  nginx-logs:
+  app-logs:
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+    internal: true

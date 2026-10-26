@@ -1,0 +1,83 @@
+:root {
+    --purple: #7950b8;
+    --purple-dark: #58358d;
+    --lavender: #f1e9fc;
+}
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 95px;
+}
+
+body {
+    margin: 0;
+    background: #faf8ff;
+    color: #30283d;
+    font-family: system-ui, sans-serif;
+    line-height: 1.7;
+}
+
+a {
+    color: var(--purple);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--purple-dark);
+}
+
+.hero {
+    padding: 90px 0;
+    background: linear-gradient(120deg, #eee2ff, #faf4ff);
+}
+
+.hero h1 {
+    font-size: clamp(2.2rem, 7vw, 4.2rem);
+    font-weight: 800;
+}
+
+h2 {
+    font-weight: 750;
+    margin-bottom: 22px;
+}
+
+.content-card {
+    padding: 26px;
+    background: white;
+    border: 1px solid #e9e0f4;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgb(72 39 110 / 5%);
+    overflow-wrap: anywhere;
+}
+
+.btn-purple {
+    background: var(--purple);
+    color: white;
+}
+
+.btn-purple:hover {
+    background: var(--purple-dark);
+    color: white;
+}
+
+footer {
+    background: var(--lavender);
+}
+
+textarea {
+    min-height: 120px;
+}
+
+@media (max-width: 576px) {
+    .hero {
+        padding: 55px 0;
+    }
+
+    .content-card {
+        padding: 20px;
+    }
+
+    .navbar a {
+        font-size: 0.9rem;
+    }
+}
